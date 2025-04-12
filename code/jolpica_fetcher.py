@@ -64,7 +64,7 @@ class JolpicaFetcher:
             json.dump(data, w, indent=4)
 
     def _retries(self, url: str, params: dict) -> requests.Response:
-        # Retry up to 3 times
+        """Retry GET request after pulling too fast"""
         for i in range(3):
             r = requests.get(url, params=params)
 
