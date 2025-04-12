@@ -4,6 +4,7 @@ import json
 from datetime import datetime
 import time
 import logging
+import argparse
 
 
 BASE_DIR = "/Users/kelstonchen/GitRepos/predicting_race_winners"
@@ -16,6 +17,16 @@ logging.basicConfig(
     style="{",
     datefmt="%Y-%m-%d %H:%M"
     )
+
+parser = argparse.ArgumentParser(description="Fetch data from Jolpica F1 API")
+parser.add_argument(
+    "-e", 
+    "--Endpoint", 
+    help="Endpoint for API, see Jolpica documentation for list of endpoints (e.g., 'results')",
+    type=str,
+    required=True
+    )
+args = vars(parser.parse_args())
 
 class JolpicaFetcher:
     def __init__(
@@ -43,25 +54,30 @@ class JolpicaFetcher:
         time = datetime.now().strftime('%Y%m%d%H%M%S')
         output = os.path.join(path, (file_id + '_' + time + '.json'))
 
+        # Create directory if does not exist
         if not os.path.exists(path):
             logging.info(f"Directory created: {path}")
             os.makedirs(path, exist_ok=True)
-        
+        # Save
         logging.info(f"Saved to: {output}")
         with open(output, 'w') as w:
             json.dump(data, w, indent=4)
 
     def _retries(self, url: str, params: dict):
+        # Retry up to 3 times
         for i in range(3):
             r = requests.get(url, params=params)
+
             if r.status_code == 429:
                 logging.warning('Too fast, sleep and try again')
                 logging.info(f'Retry: {i + 1}')
                 time.sleep(3)
                 continue
+            
             elif r.status_code == 200:
                 logging.info(f'Successful pull after {i + 1} tries')
                 return r
+        
         raise Exception(f"Failed to fetch data after 3 retries. Status code: {r.status_code}")
 
     def fetch(self) -> None:
@@ -81,9 +97,11 @@ class JolpicaFetcher:
                         )
                     r = requests.get(url, params=updated_params)
 
+                    # If too fast
                     if r.status_code == 429:
                         r = self._retries(url, params=updated_params)
-
+                    
+                    # Save data
                     data = r.json()['MRData']
                     self._save(
                         data,
@@ -91,29 +109,25 @@ class JolpicaFetcher:
                         file_id=self.endpoint
                         )
                     
+                    # Pagination
                     updated_params['offset'] += updated_params['limit']
 
-                    # if int(updated_params['offset']) >= int(data['total']):
-                    #     print('Nothing left to fetch')
-                    #     break
-                    if int(updated_params['offset']) >= 30:
+                    # If offest is greater than or equal to total, all data has been fetched
+                    if int(updated_params['offset']) >= int(data['total']):
+                        logging.info(f'Nothing left to fetch for {season} season')
                         break
+
                 except requests.exceptions.RequestException as e:
                     raise e
 
-
-# r = requests.get(os.path.join(BASE_URL, '2022', 'results'), params={'limit': 30, 'offset': 0})
-# data = r.json()['MRData']
-
-# with open(os.path.join(BASE_DIR, 'data', 'raw', 'test__.json'), 'w') as w:
-#     json.dump(data, w, indent=4)
-
 def main():
+    logging.info(f'==== FETCHING FOR ENDPOINT: {args['Endpoint']} ====')
+
     fetcher = JolpicaFetcher(
         BASE_URL, 
         params={'limit': 30, 'offset': 0},
         seasons=SEASONS,
-        endpoint='results',
+        endpoint=args['Endpoint'],
         filepath=os.path.join(BASE_DIR, 'data', 'raw')
         )
     fetcher.fetch()
