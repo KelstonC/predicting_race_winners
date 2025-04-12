@@ -26,6 +26,14 @@ parser.add_argument(
     type=str,
     required=True
     )
+parser.add_argument(
+    "-s", 
+    "--Seasons", 
+    help="Season(s) to fetch data for. If not specified, will fetch for all seasons (i.e., 2022-2025).",
+    type=int,
+    default=SEASONS,
+    required=False
+    )
 args = vars(parser.parse_args())
 
 class JolpicaFetcher:
@@ -126,7 +134,7 @@ def main():
     fetcher = JolpicaFetcher(
         BASE_URL, 
         params={'limit': 30, 'offset': 0},
-        seasons=SEASONS,
+        seasons=[args['Seasons']] if isinstance(args['Seasons'], int) else args['Seasons'],
         endpoint=args['Endpoint'],
         filepath=os.path.join(BASE_DIR, 'data', 'raw')
         )
