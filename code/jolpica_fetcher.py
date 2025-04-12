@@ -63,7 +63,7 @@ class JolpicaFetcher:
         with open(output, 'w') as w:
             json.dump(data, w, indent=4)
 
-    def _retries(self, url: str, params: dict):
+    def _retries(self, url: str, params: dict) -> requests.Response:
         # Retry up to 3 times
         for i in range(3):
             r = requests.get(url, params=params)
@@ -121,7 +121,7 @@ class JolpicaFetcher:
                     raise e
 
 def main():
-    logging.info(f'==== FETCHING FOR ENDPOINT: {args['Endpoint']} ====')
+    logging.info(f"==== FETCHING FOR ENDPOINT: {args['Endpoint']} ====")
 
     fetcher = JolpicaFetcher(
         BASE_URL, 
