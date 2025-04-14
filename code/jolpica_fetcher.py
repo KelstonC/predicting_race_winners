@@ -18,24 +18,6 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M"
     )
 
-parser = argparse.ArgumentParser(description="Fetch data from Jolpica F1 API")
-parser.add_argument(
-    "-e", 
-    "--Endpoint", 
-    help="Endpoint for API, see Jolpica documentation for list of endpoints (e.g., 'results')",
-    type=str,
-    required=True
-    )
-parser.add_argument(
-    "-s", 
-    "--Seasons", 
-    help="Season(s) to fetch data for. If not specified, will fetch for all seasons (i.e., 2022-2025).",
-    type=int,
-    default=SEASONS,
-    required=False
-    )
-args = vars(parser.parse_args())
-
 class JolpicaFetcher:
     def __init__(
             self, 
@@ -129,6 +111,24 @@ class JolpicaFetcher:
                     raise e
 
 def main():
+    parser = argparse.ArgumentParser(description="Fetch data from Jolpica F1 API")
+    parser.add_argument(
+        "-e", 
+        "--Endpoint", 
+        help="Endpoint for API, see Jolpica documentation for list of endpoints (e.g., 'results')",
+        type=str,
+        required=True
+        )
+    parser.add_argument(
+        "-s", 
+        "--Seasons", 
+        help="Season(s) to fetch data for. If not specified, will fetch for all seasons (i.e., 2022-2025).",
+        type=int,
+        default=SEASONS,
+        required=False
+        )
+    args = vars(parser.parse_args())
+
     logging.info(f"==== FETCHING FOR ENDPOINT: {args['Endpoint']} ====")
 
     fetcher = JolpicaFetcher(
