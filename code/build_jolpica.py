@@ -22,7 +22,7 @@ def save_data(df: pd.DataFrame, endpoint: str) -> None:
     output = os.path.join(path, endpoint + '.csv')
     
     os.makedirs(path, exist_ok=True)
-    df.to_csv(output)
+    df.to_csv(output, index=False)
     
     logging.info(f'Data saved to: {output}')
 
@@ -44,16 +44,18 @@ def build_data(endpoint: str, key: str) -> pd.DataFrame:
                 # Some parsed data may contain more than one race
                 for d in range(len(race_data)):
                     # Build DataFrame
-                    season_id = race_data[d]['season']
-                    round_id = race_data[d]['round']
+                    season_id = int(race_data[d]['season'])
+                    round_id = int(race_data[d]['round'])
+                    circuit_id = str(race_data[d]['Circuit']['circuitId'])
                     race_df = pd.DataFrame(race_data[d][key])
                     race_df['season'] = season_id
                     race_df['round'] = round_id
+                    race_df['circuit'] = circuit_id
 
                     data_list.append(race_df)
 
     # Stack into a single DataFrame
-    stacked = pd.concat(data_list).sort_values(by=['season', 'round'])
+    stacked = pd.concat(data_list).sort_values(by=['season', 'round'], ascending=True)
     
     return stacked
 
