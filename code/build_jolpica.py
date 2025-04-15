@@ -47,7 +47,7 @@ def build_data(endpoint: str, key: str) -> pd.DataFrame:
                     season_id = int(race_data[d]['season'])
                     round_id = int(race_data[d]['round'])
                     circuit_id = str(race_data[d]['Circuit']['circuitId'])
-                    race_df = pd.DataFrame(race_data[d][key])
+                    race_df = pd.json_normalize(race_data[d][key])
                     race_df['season'] = season_id
                     race_df['round'] = round_id
                     race_df['circuit'] = circuit_id
