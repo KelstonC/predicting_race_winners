@@ -107,6 +107,8 @@ class JolpicaFetcher:
                         logging.info(f'Nothing left to fetch for {season} season')
                         break
 
+                    time.sleep(0.5)
+
                 except requests.exceptions.RequestException as e:
                     raise e
 

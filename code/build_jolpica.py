@@ -56,6 +56,7 @@ def build_data(endpoint: str, key: str) -> pd.DataFrame:
 
     # Stack into a single DataFrame
     stacked = pd.concat(data_list).sort_values(by=['season', 'round'], ascending=True)
+    stacked = stacked.drop_duplicates(subset=['season', 'round', 'Driver.driverId'])
     
     return stacked
 
